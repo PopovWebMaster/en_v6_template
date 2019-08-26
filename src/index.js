@@ -9,4 +9,4 @@ import './css/css_fontello/fontello-embedded.css';
 import './css/css_fontello/fontello-ie7.css';
 import './css/css_fontello/fontello-ie7-codes.css';
 
-
+var a = 1;
