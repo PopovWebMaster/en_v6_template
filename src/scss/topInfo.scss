@@ -1,0 +1,46 @@
+#enter {
+	max-width: 960px;
+	width: 86%;
+	margin: 62px auto 0px;
+}
+
+#enter_page {
+	display: block;
+	font-family: 'El Messiri', sans-serif;
+	text-align: right;
+	margin: 10px;
+}
+#enter_page .us_name{
+	margin-right: 5px;
+}
+
+span.enter_exit {
+	font-size: 15px;
+	margin-left: 20px;
+	//text-decoration: none;
+	color: #32394a;
+}
+span.enter_exit:hover {
+	color: #556acc;
+}
+
+a.enter_exit {
+    font-size: 15px;
+    margin-left: 5px;
+    color: #32394a;
+    cursor: pointer;
+    text-decoration: underline;
+}
+a.enter_exit:active {
+    color: #32394a;
+    //text-decoration: none;
+}
+
+@media screen and (min-width: 100px) and (max-width: 768px){
+	#enter_page {
+		display: none;
+	}
+	#nav_li ul#ul_list li#ul_li_ent_exit {
+		display: flex;
+	}
+}
