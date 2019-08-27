@@ -11,3 +11,9 @@ import './css/css_fontello/fontello-ie7-codes.css';
 import './scss/main.scss'; 
 
 
+
+
+
+import './js/leftMenu.js';
+
+
