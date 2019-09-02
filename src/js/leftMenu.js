@@ -1,105 +1,188 @@
 import $ from "jquery";
 
 
-let menu = $("nav#nav_main");
-let isBadClick = false;
 
-$( menu ).css({"left": -getParam().menuWidth , "opacity": "0"}); // при загрузке устанавливает мену в нужное положение
+class LeftMenu {
 
+    constructor() {
+        this.SPEED_ANIMATE = 300;
 
+        this.menu = $("nav#nav_main");
+        this.isGoodClick = true;
 
-
-/*
-$("#menu_logo").on("click", this.toggle_open_status_menu);
-$("main").on("click", this.toggle_open_status_menu);
-$("#nav_close_wrp").on("click", this.toggle_open_status_menu);
-$(".itemMenu").on("click", this.toggle_open_status_menu);
-*/
-
-
-$("#menu_logo").on('click', function(){
-
-    if( !isBadClick ){
-        isBadClick = true;
-        openCloseMenu( getParam() );
-        console.dir( getParam() );
-
-        setTimeout( function(){
-            
-            isBadClick = false;
-
-        }, 500 );
- 
-    };
-
-    
-});
-
-$("main").on('click', function(){
-    
-    console.dir( isBadClick );
-    if( !isBadClick ){
-
-        isBadClick = true;
-        openCloseMenu( getParam() );
-        console.dir( getParam() );
-
-        setTimeout( function(){
-            
-            isBadClick = false;
-            console.dir( isBadClick );
-        }, 500 );
+        this.stopBadClick = this.stopBadClick.bind(this);
+        this.open = this.open.bind(this);
+        this.close = this.close.bind(this);
 
         
- 
+
+        this.preparesMenuAtStart();
+        this.runEvents();
+    }
+
+    
+    
+
+
+    // ВОЗВРАЩАЕТ ОБЪЕКТ ТЕКУЩИХ ПАРАМЕТРОВ МЕНЮ
+    /* 
+        {
+            menuWidth: '',
+            positionLeft: '',
+            isOpen: false
+        };
+    
+    */
+    getParam(){
+        let res = {
+            menuWidth: '',
+            positionLeft: '',
+            isOpen: false
+        };
+    
+        res.menuWidth = $( this.menu ).innerWidth();
+        res.positionLeft = $( this.menu ).position().left;
+    
+        if( res.positionLeft !== 0 ){
+            res.isOpen = false;
+        }else{
+            res.isOpen = true;
+        };
+        return res;
+    
     };
-});
 
-
-
-
-
-function openCloseMenu( param ){
-
-    let speed_animate_menu = 300;
-
-    let newParam = {
-        newLeft: '',
-        newOpacity: ''
-    };
-
-    let setNewOpacity;
-
-    if( param.isOpen ){
-        newParam.newLeft = -param.menuWidth
-        newParam.newOpacity = 0;
-        setNewOpacity = function(){
-
-            let timer = setTimeout( function(){
-                $( menu ).css("opacity", newParam.newOpacity);
-            }, speed_animate_menu );
-            clearTimeout(timer);
-
+    // ОТКРЫВАЕТ МЕНЮ
+    open(){
+        if( this.getParam().isOpen ){ // защита от ошибки
+            return;
         };
 
-    }else{
-        newParam.newLeft = 0
-        newParam.newOpacity = 1;
-        $( menu ).css("opacity", newParam.newOpacity);
-        setNewOpacity = function(){
-            
+        $( this.menu ).css("opacity", "1");
+
+        $( this.menu ).animate(
+            { 
+                left: 0
+            }, 
+            this.SPEED_ANIMATE, 
+            "swing"
+        );
+    }
+
+    // ЗАКРЫВАЕТ МЕНЮ
+    close( func = undefined ){
+        if( !this.getParam().isOpen ){ // защита от ошибки
+            return;
         };
-    };
 
-    $( menu ).animate(
-        { 
-            left: newParam.newLeft
-        }, 
-        speed_animate_menu, 
-        "swing", 
-        setNewOpacity
-    );
+        $( this.menu ).animate(
+            { 
+                left:  -this.getParam().menuWidth
+            }, 
+            this.SPEED_ANIMATE, 
+            "swing",
+            function(){
 
+                if( func !== undefined ){
+                    func();
+                };
+
+                $( this.menu ).css("opacity", "0");
+            }
+        );
+    }
+
+    // НАСТРАИВАЕТ МЕНЮ ПЕРЕД НАЧАЛОМ РАБОТЫ КЛАССА
+    preparesMenuAtStart(){
+        // изначально предполагается что в файле css 
+        /*
+            nav#nav_main {
+                ...
+                left: -400px; <- случайное число
+                opacity: 0;
+            }
+        */
+        // при загрузке устанавливает меню в нужное положение
+        // т ставит прозрачность в 0 (навсякий случай)
+        $( this.menu ).css({"left": -this.getParam().menuWidth , "opacity": "0"});  
+
+    }
+
+    // ПОДКЛЮЧАЕТ СЛУШАТЕЛЕЙ СОБЫТИЙ
+    runEvents(){
+
+        // иконка меню
+        $("#menu_logo").on("click", () => {
+            this.stopBadClick( () => {
+                if( this.getParam().isOpen ){
+
+                    this.close();
+                }else if( !this.getParam().isOpen ){
+
+                    this.open();
+                };
+
+            });
+        });
+
+        // на любое место вне меню
+        $("main").on("click", () => {
+            this.stopBadClick( () => {
+                if( this.getParam().isOpen ){
+                    this.close();
+                };
+            });
+        });
+
+        // стрелка закрыть
+        $("#nav_close_wrp").on("click", () => {
+            this.stopBadClick( () => {
+                this.close();
+            });
+        });
+
+        // пункт меню
+        $(".itemMenu").on("click", ( event ) => {
+            this.stopBadClick( () => {
+                this.close( () => {
+                    console.dir( event.currentTarget.id );
+                    /*
+                    
+                        Здесь место для обраотки кликов по пунктам меню
+                    
+                    
+                    */
+                });
+            });
+        });
+
+        // выбрать словарь
+        $(".itemMenuButStart").on("click", ( event ) => {
+            this.stopBadClick( () => {
+                this.close( () => {
+                    console.dir( event.currentTarget.id );
+                    /*
+                    
+                        Здесь место для обраотки кликов по выбору словаря
+                    
+                    
+                    */
+                });
+            });
+        });
+    }
+
+    // БЛОКИРУЕТ ДУРНЫЕ КЛИКИ
+    stopBadClick( func ){
+        if( !this.isGoodClick ){
+            return;
+        };
+        this.isGoodClick = false;
+        func()
+        setTimeout( ()=>{  
+            this.isGoodClick = true;
+        }, 500 );
+    }
 };
 
 
@@ -107,36 +190,6 @@ function openCloseMenu( param ){
 
 
 
-
-
-
-
-function getParam(){
-    let res = {
-        menuWidth: '',
-        positionLeft: '',
-        isOpen: false
-    };
-
-    res.menuWidth = $( menu ).innerWidth();
-    res.positionLeft = $( menu ).position().left;
-
-    if( res.positionLeft !== 0 ){
-        res.isOpen = false;
-    }else{
-        res.isOpen = true;
-    };
-    return res;
-
-};
-
-console.dir( getParam() );
-
-
-
-
-
-
-
+let leftMenu = new LeftMenu();
 
 
