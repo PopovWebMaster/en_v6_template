@@ -20,7 +20,7 @@ module.exports = {
     },
 
     output: {
-        filename: `${PATHS.assets}js/[name].[hash].js`, // filename: `${PATHS.assets}js/[name].[hash].js`
+        filename: `${PATHS.assets}js/[name].js`, // filename: `${PATHS.assets}js/[name].[hash].js`
         path: PATHS.dist, 
         publicPath: '' // '/dist'
     },
@@ -98,7 +98,7 @@ module.exports = {
     plugins: [
 
         new MiniCssExtractPlugin({
-            filename: `${PATHS.assets}css/[name].[hash].css` // filename: `${PATHS.assets}css/[name].[hash].css`
+            filename: `${PATHS.assets}css/[name].css` // filename: `${PATHS.assets}css/[name].[hash].css`
         }),
         new HtmlWebpackPlugin({
             hash: false,

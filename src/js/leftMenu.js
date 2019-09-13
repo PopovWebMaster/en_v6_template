@@ -10,30 +10,35 @@ class LeftMenu {
         this.menu = $("nav#nav_main");
         this.isGoodClick = true;
 
+        this.value_in_session = null;
+        this.itemSessionIndex = 0; // имя для ячейки в сессии здесь хранится индекс клика если клик был не на главной странице
+
         this.stopBadClick = this.stopBadClick.bind(this);
         this.open = this.open.bind(this);
         this.close = this.close.bind(this);
-
-        
+        this.checkSession = this.checkSession.bind(this);
+        this.scrollTo = this.scrollTo.bind(this);
+        this.isHomePage = this.isHomePage.bind(this);
+        this.processing_values_from_session_and_scroll = this.processing_values_from_session_and_scroll.bind(this);
 
         this.preparesMenuAtStart();
         this.runEvents();
+
+        this.processing_values_from_session_and_scroll();
+
     }
 
-    
-    
-
-
     // ВОЗВРАЩАЕТ ОБЪЕКТ ТЕКУЩИХ ПАРАМЕТРОВ МЕНЮ
-    /* 
-        {
-            menuWidth: '',
-            positionLeft: '',
-            isOpen: false
-        };
     
-    */
     getParam(){
+        /* 
+            {
+                menuWidth: '',
+                positionLeft: '',
+                isOpen: false
+            };
+        
+        */
         let res = {
             menuWidth: '',
             positionLeft: '',
@@ -145,13 +150,29 @@ class LeftMenu {
         $(".itemMenu").on("click", ( event ) => {
             this.stopBadClick( () => {
                 this.close( () => {
-                    console.dir( event.currentTarget.id );
-                    /*
+
+                    let index = getIndexLi( event );
+
+                    if( this.isHomePage() ){ // если во время клика мы находимся на главной странице
+                        this.scrollTo( index );
+
+                    }else{// если во время клика мы на любой другой странице
+                        sessionStorage.setItem( this.itemSessionIndex, index );
+                        document.location.href = '/';
+                    };
                     
-                        Здесь место для обраотки кликов по пунктам меню
-                    
-                    
-                    */
+                    function getIndexLi( event ){
+                        // её задача вычислить индекс кликнутого li 
+                        let res = 0;
+                        for( let i = 0; i < $('#ul_list li').length; i++ ){
+                            if( $( '#ul_list li' ).eq( i ).hasClass( "itenMenuLi" ) ){
+                               res = i;
+                                break;
+                            };
+                        };
+                        return $( event.currentTarget ).parent().index() - res;
+                    };
+
                 });
             });
         });
@@ -183,11 +204,76 @@ class LeftMenu {
             this.isGoodClick = true;
         }, 500 );
     }
+
+    checkSession(){
+
+        let newItem = sessionStorage.getItem( this.itemSessionIndex );
+
+        if( newItem ){ // не равно null, то есть чтото лежит в значении this.itemSessionIndex
+            return true;
+        }else{
+            return false;
+        };
+    }
+
+    processing_values_from_session_and_scroll(){
+        // выполняет действие на старте, если клик на пункт меню был со страницы не главной
+        // то она читает сессию и прокручивает страницу по данным из сессии
+        if( this.checkSession() ){
+            this.scrollTo( sessionStorage.getItem( this.itemSessionIndex ) );
+            sessionStorage.removeItem( this.itemSessionIndex );
+        };
+    }
+  
+    isHomePage(){ // её задача вернуть true если мы находимся на главной и наоборот
+        if( document.location.pathname === '/'){
+            return true;
+        }else{
+            return false;
+        };
+    }
+
+
+
+    scrollTo( index_itemMenu ){
+
+        let currentTopPosition = $( window ).scrollTop();
+        let arrArticlesTopPosition = getArticlesTopPosition();
+        let spidScroll = false;
+
+        //делает razn всегда положителным
+        let razn =  arrArticlesTopPosition[ index_itemMenu ] - currentTopPosition;
+        if(razn < 0){
+            razn = razn * (-1);
+        };
+
+        //выбирает скорость
+        if( razn <= 500 ){
+            spidScroll = 500;
+        }else if( razn <= 1500 ){
+            spidScroll = 800;
+        }else if( razn < 2500 ){
+            spidScroll = 1100;
+        }else if( razn >= 2500 ){
+            spidScroll = 1400;
+        };
+
+        $('html, body').animate({scrollTop: arrArticlesTopPosition[ index_itemMenu ] }, spidScroll, "swing");
+
+        function getArticlesTopPosition(){// Возвращает позиции всех <article> в виде массива
+            let len = $('main section article').length;
+            let res = [];
+            let height_header = $( '#head_wrap' ).outerHeight();
+  
+            for( let i = 0; i < len; i++){
+                let topPos = $( 'main section article' ).eq( i ).position().top;//position offset
+                res.push( topPos - height_header );
+            };
+            return res;
+        };
+    }
+
 };
-
-
-
-
 
 
 let leftMenu = new LeftMenu();
