@@ -130,6 +130,17 @@ class LeftMenu {
             });
         });
 
+        $('#ul_li_ent_exit a').on("click", ( event ) => {
+            event.preventDefault();
+            this.stopBadClick( () => {
+                if( this.getParam().isOpen ){
+                    this.close( () => {
+                        document.location.href = event.currentTarget.href;
+                    });
+                };
+            });
+        });
+        
         // на любое место вне меню
         $("main").on("click", () => {
             this.stopBadClick( () => {
@@ -179,15 +190,12 @@ class LeftMenu {
 
         // выбрать словарь
         $(".itemMenuButStart").on("click", ( event ) => {
+            event.preventDefault();
             this.stopBadClick( () => {
                 this.close( () => {
-                    console.dir( event.currentTarget.id );
-                    /*
-                    
-                        Здесь место для обраотки кликов по выбору словаря
-                    
-                    
-                    */
+
+                    document.location.href = event.currentTarget.href;
+
                 });
             });
         });
